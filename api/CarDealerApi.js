@@ -8,7 +8,7 @@ class CarDealerApi {
 
       return data.Results;
     } catch (err) {
-      throw new Error(err.message);
+      throw new Error(`Error in getVehicles: ${err.message}`);
     }
   }
 
@@ -22,7 +22,7 @@ class CarDealerApi {
 
       return data.Results;
     } catch (err) {
-      throw new Error(err.message);
+      throw new Error(`Error in getVehiclesByIdAndYear: ${err.message}`);
     }
   }
 }

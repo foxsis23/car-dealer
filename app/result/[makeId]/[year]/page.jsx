@@ -1,6 +1,7 @@
 import React from 'react';
 import CarDealerApi from '@/api/CarDealerApi';
 import { yearsOptions } from '@/constants/selectOptions';
+import { Card } from '@/components/Card';
 
 export async function generateStaticParams() {
   const vehicles = await CarDealerApi.getVehicles();
@@ -22,24 +23,31 @@ export async function generateStaticParams() {
 const Page = async ({ params }) => {
   const { makeId, year } = await params;
 
-  const vehiclesData = await CarDealerApi.getVehiclesByIdAndYear(makeId, year);
+  let vehiclesData = null;
+  let error = null;
+
+  try {
+    vehiclesData = await CarDealerApi.getVehiclesByIdAndYear(makeId, year);
+  } catch (err) {
+    error = err.message;
+  }
+
+  if (error) {
+    return <div className="m-auto text-4xl text-red-500">{error}</div>;
+  }
 
   return (
     <main className="flex flex-col items-center md:mt-40 mt-10 gap-5">
       <h1 className="font-bold text-4xl text-white">Results</h1>
-      <section className="flex md:flex-row flex-col gap-4 items-center flex-wrap justify-center md:max-w-[950px]">
+      <section className="flex md:flex-row flex-col gap-4 items-center flex-wrap justify-center md:max-w-[950px] m-10">
         {vehiclesData.map(vehicle => (
-          <div
+          <Card
             key={vehicle.Model_ID}
-            className="bg-white rounded-md p-2 shadow-lg w-[300px]"
-          >
-            <div className="flex flex-row gap-2 text-xl">
-              <p>{vehicle.Make_Name}</p>
-              <p>{vehicle.Model_Name}</p>
-            </div>
-            <p>Make ID:{vehicle.Make_ID}</p>
-            <p>Model ID:{vehicle.Model_ID}</p>
-          </div>
+            makeId={vehicle.Make_ID}
+            makeName={vehicle.Make_Name}
+            modelId={vehicle.Model_ID}
+            modelName={vehicle.Model_Name}
+          />
         ))}
       </section>
     </main>

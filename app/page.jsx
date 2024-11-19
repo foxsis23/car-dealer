@@ -5,21 +5,35 @@ import CarDealerApi from '@/api/CarDealerApi';
 import { Dropdown } from '@/components/Dropdown';
 import Link from 'next/link';
 import { yearsOptions } from '@/constants/selectOptions';
+import { Loader } from '@/components/Loader';
 
 export default function Home() {
   const [vehicles, setVehicles] = useState([]);
   const [selectedMakesId, setSelectedMakesId] = useState('');
   const [selectedYearModel, setSelectedYearModel] = useState('');
 
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
+
   const getVehiclesData = async () => {
-    const vehiclesData = await CarDealerApi.getVehicles();
-    setVehicles(vehiclesData);
-    console.log(vehiclesData);
+    try {
+      const vehiclesData = await CarDealerApi.getVehicles();
+      setLoading(true);
+      setVehicles(vehiclesData);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
     getVehiclesData();
   }, []);
+
+  if (error) {
+    return <div className="m-auto text-4xl text-red-500">{error}</div>;
+  }
 
   return (
     <main className="flex flex-col gap-6 mt-40 items-center justify-center">
@@ -27,16 +41,23 @@ export default function Home() {
         Car <span className="text-[#FFC107]">Dealer</span> App
       </h1>
       <div className="flex flex-row items-end gap-3">
-        <Dropdown
-          label="Makes ID"
-          setItem={setSelectedMakesId}
-          items={vehicles}
-        />
-        <Dropdown
-          label="Model Year"
-          setItem={setSelectedYearModel}
-          items={yearsOptions}
-        />
+        {loading ? (
+          <Loader />
+        ) : (
+          <>
+            <Dropdown
+              label="Makes ID"
+              setItem={setSelectedMakesId}
+              items={vehicles}
+            />
+
+            <Dropdown
+              label="Model Year"
+              setItem={setSelectedYearModel}
+              items={yearsOptions}
+            />
+          </>
+        )}
 
         <Link href={`/result/${selectedMakesId}/${selectedYearModel}`}>
           <button
